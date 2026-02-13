@@ -271,6 +271,20 @@
       newLeft = clamp(newLeft, 0, z.width - b.width);
       newTop  = clamp(newTop, 0, z.height - b.height);
 
+      // If the integer part of the new position is the same as the current, it means the button didn't move (probably due to rounding), so we force it to move in that case
+
+      if (Math.floor(newLeft) === Math.floor(b.left - z.left) &&
+          Math.floor(newTop) === Math.floor(b.top - z.top)) {
+        // Overflow - add half the available space to ensure movement even from (0,0)
+        const maxLeft = z.width - b.width;
+        const maxTop = z.height - b.height;
+
+        newLeft = (newLeft + maxLeft / 2) % maxLeft;
+        newTop  = (newTop + maxTop / 2) % maxTop;
+        newLeft = clamp(newLeft, 0, maxLeft);
+        newTop  = clamp(newTop, 0, maxTop);
+      }
+
       noBtn.style.left = newLeft + "px";
       noBtn.style.top = newTop + "px";
       noBtn.style.transform = "none";
@@ -284,7 +298,8 @@
         (b.left + b.width / 2) - e.clientX,
         (b.top + b.height / 2) - e.clientY
       );
-      if (d < 140) moveNo(e.clientX, e.clientY);
+
+      if (d < 100) moveNo(e.clientX, e.clientY);
     });
 
     noBtn.addEventListener("click", e => e.preventDefault());
@@ -294,12 +309,10 @@
       zone.style.display = "none";
       hint.style.display = "none";     // HIDE THE HINT
       result.style.display = "block";
+
       resizeConfettiCanvas();
       fullScreenConfetti();
     });
   </script>
 </body>
 </html>
-
-
-
